@@ -13,6 +13,18 @@ public class UserService {
     @Autowired
     private UserRepo userRepo;
 
+    public User get(Long id) {
+        return userRepo.getOne(id);
+    }
+
+    public User getByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
+
+    public User getByNick(String nick) {
+        return userRepo.findByNick(nick);
+    }
+
     public User get(Long tenantId, Long id) {
         return userRepo.findByTenantIdAndId(tenantId, id);
     }
@@ -35,5 +47,9 @@ public class UserService {
 
     public List<User> findByOrganization(Long tenantId, Long organizationId) {
         return userRepo.findByTenantIdAndOrganizationId(tenantId, organizationId);
+    }
+
+    public void save(User user) {
+        userRepo.save(user);
     }
 }

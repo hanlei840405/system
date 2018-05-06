@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: system
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/bird_system
@@ -8,5 +10,16 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
+  redis:
+    port: 32769
+  session:
+    store-type: redis
 logging:
-  level: debug
+  level:
+    root: info
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8101/eureka/
+server:
+  port: 8201
