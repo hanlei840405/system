@@ -1,5 +1,6 @@
 package com.bird.framework.system.entity;
 
+
 import lombok.Data;
 
 import javax.persistence.*;
@@ -8,33 +9,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Entity(name = "system_user")
-public class User implements Serializable {
+@Entity(name = "system_resource")
+public class Resource implements Serializable {
 
-    private static final long serialVersionUID = 7505708934034027983L;
+    private static final long serialVersionUID = 947102556835339597L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String code;
 
-    private String password;
-
-    private String nick;
-
-    private String realName;
-
-    private String mobile;
-
-    private String email;
-
-    private String birthday;
+    private String name;
 
     @ManyToOne
     private Tenant tenant;
-
-    @ManyToOne
-    private Organization organization;
 
     @Version
     private Long version;
@@ -46,6 +34,6 @@ public class User implements Serializable {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
             },
-            mappedBy = "users")
+            mappedBy = "resources")
     private Set<Role> roles = new HashSet<>(0);
 }

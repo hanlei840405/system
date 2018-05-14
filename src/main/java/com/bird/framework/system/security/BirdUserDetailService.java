@@ -1,6 +1,8 @@
 package com.bird.framework.system.security;
 
+import com.bird.framework.system.entity.Role;
 import com.bird.framework.system.entity.User;
+import com.bird.framework.system.service.RoleService;
 import com.bird.framework.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +19,8 @@ import java.util.List;
 public class BirdUserDetailService implements UserDetailsService {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -26,7 +30,8 @@ public class BirdUserDetailService implements UserDetailsService {
         }
         String password = user.getPassword();
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        List<Role> roles = roleService.findByUserId(user.getTenant().getId(), user.getId());
+        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getCode())));
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.
                 User(s, password, authorities);
