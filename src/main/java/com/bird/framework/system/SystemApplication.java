@@ -16,7 +16,7 @@ public class SystemApplication {
 
     public static void main(String[] args) {
         ApplicationContext atx = SpringApplication.run(SystemApplication.class, args);
-        BCryptPasswordEncoder encoder =new BCryptPasswordEncoder();
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         User user = new User();
         user.setUsername("admin");
         user.setPassword(encoder.encode("12345"));

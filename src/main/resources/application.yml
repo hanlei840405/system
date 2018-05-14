@@ -12,8 +12,7 @@ spring:
     show-sql: true
   redis:
     port: 32769
-  session:
-    store-type: redis
+    host: localhost
 logging:
   level:
     root: info
