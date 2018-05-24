@@ -28,21 +28,17 @@ public class Role implements Serializable {
 
     @ManyToOne
     private Tenant tenant;
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            })
-    @JoinTable(name = "sys_role_user",
-            joinColumns = {@JoinColumn(name = "role_id")},
-            inverseJoinColumns = {@JoinColumn(name = "user_id")})
+
+    @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>(0);
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            })
+    @ManyToMany
+    @JoinTable(name = "sys_role_menu",
+            joinColumns = {@JoinColumn(name = "role_id")},
+            inverseJoinColumns = {@JoinColumn(name = "menu_id")})
+    private Set<Menu> menus = new HashSet<>(0);
+
+    @ManyToMany
     @JoinTable(name = "sys_role_resource",
             joinColumns = {@JoinColumn(name = "role_id")},
             inverseJoinColumns = {@JoinColumn(name = "resource_id")})

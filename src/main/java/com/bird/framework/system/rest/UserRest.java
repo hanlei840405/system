@@ -2,9 +2,9 @@ package com.bird.framework.system.rest;
 
 import com.bird.framework.system.entity.User;
 import com.bird.framework.system.service.UserService;
+import com.bird.framework.system.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,8 +17,7 @@ public class UserRest {
 
     @RequestMapping("/username/{username}")
     @PreAuthorize("hasRole('ADMIN')")
-    public User getByUsername(@PathVariable("username") String username) {
-        String principal = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public UserVo getByUsername(@PathVariable("username") String username) {
         return userService.getByUsername(username);
     }
 }

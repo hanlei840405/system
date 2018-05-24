@@ -4,6 +4,8 @@ import com.bird.framework.system.entity.Role;
 import com.bird.framework.system.entity.User;
 import com.bird.framework.system.service.RoleService;
 import com.bird.framework.system.service.UserService;
+import com.bird.framework.system.vo.RoleVo;
+import com.bird.framework.system.vo.UserVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,14 +26,14 @@ public class BirdUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        User user = userService.getByUsername(s);
-        if (user == null) {
+        UserVo userVo = userService.getByUsername(s);
+        if (userVo == null) {
             throw new UsernameNotFoundException(String.format("The username %s doesn't exist", s));
         }
-        String password = user.getPassword();
+        String password = userVo.getPassword();
         List<GrantedAuthority> authorities = new ArrayList<>();
-        List<Role> roles = roleService.findByUserId(user.getTenant().getId(), user.getId());
-        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getCode())));
+        List<RoleVo> roleVos = roleService.findByUserId(userVo.getId());
+        roleVos.forEach(roleVo -> authorities.add(new SimpleGrantedAuthority(roleVo.getCode())));
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.
                 User(s, password, authorities);

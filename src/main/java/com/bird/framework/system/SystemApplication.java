@@ -1,7 +1,9 @@
 package com.bird.framework.system;
 
-import com.bird.framework.system.entity.User;
-import com.bird.framework.system.service.UserService;
+import com.bird.framework.system.entity.*;
+import com.bird.framework.system.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
@@ -14,13 +16,101 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableJpaRepositories
 public class SystemApplication {
 
-    public static void main(String[] args) {
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    public static void main(String[] args) throws JsonProcessingException {
         ApplicationContext atx = SpringApplication.run(SystemApplication.class, args);
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        Tenant tenant = new Tenant();
+        tenant.setCode("0001");
+        tenant.setLegalPerson("0001");
+        tenant.setLegalPersonId("0001");
+        tenant.setLegalPersonMobile("0001");
+        tenant.setName("0001");
+        tenant.setStatus("1");
         User user = new User();
         user.setUsername("admin");
         user.setPassword(encoder.encode("12345"));
+        user.setTenant(tenant);
+        user.setStatus("1");
+        Role role = new Role();
+        role.setCode("ADMIN");
+        role.setName("超级管理员");
+        role.setTenant(tenant);
+        role.setStatus("1");
+        Menu systemMenu = new Menu();
+        systemMenu.setCode("0001");
+        systemMenu.setName("系统管理");
+        systemMenu.setTenant(tenant);
+        systemMenu.setHeight(1);
+        systemMenu.setStatus("1");
+        Menu organizationMenu = new Menu();
+        organizationMenu.setCode("00010001");
+        organizationMenu.setName("组织机构管理");
+        organizationMenu.setUrl("/system/organization");
+        organizationMenu.setTenant(tenant);
+        organizationMenu.setHeight(2);
+        organizationMenu.setParent(systemMenu);
+        organizationMenu.setStatus("1");
+        Menu userMenu = new Menu();
+        userMenu.setCode("00010002");
+        userMenu.setName("用户管理");
+        userMenu.setTenant(tenant);
+        userMenu.setUrl("/system/user");
+        userMenu.setHeight(2);
+        userMenu.setParent(systemMenu);
+        userMenu.setStatus("1");
+
+        TenantService tenantService = atx.getBean(TenantService.class);
+        tenantService.save(tenant);
+        MenuService menuService = atx.getBean(MenuService.class);
+        menuService.save(systemMenu);
+        menuService.save(organizationMenu);
+        menuService.save(userMenu);
+        RoleService roleService = atx.getBean(RoleService.class);
+        role.getMenus().add(systemMenu);
+        role.getMenus().add(organizationMenu);
+        role.getMenus().add(userMenu);
+        roleService.save(role);
+        user.getRoles().add(role);
         UserService userService = atx.getBean(UserService.class);
         userService.save(user);
+
+        OrganizationService organizationService = atx.getBean(OrganizationService.class);
+        Organization root = new Organization();
+        root.setCode("0000");
+        root.setName("root");
+        root.setLeaf(false);
+        root.setPath("0000");
+        root.setStatus("1");
+        root.setTenant(tenant);
+        organizationService.save(root);
+        Organization organization = new Organization();
+        organization.setCode("0001");
+        organization.setName("京东商城");
+        organization.setLeaf(false);
+        organization.setPath("001");
+        organization.setStatus("1");
+        organization.setTenant(tenant);
+        organization.setParent(root);
+        organizationService.save(organization);
+        Organization organization1 = new Organization();
+        organization1.setCode("0002");
+        organization1.setName("京东金融");
+        organization1.setLeaf(false);
+        organization1.setPath("002");
+        organization1.setStatus("1");
+        organization1.setTenant(tenant);
+        organization1.setParent(root);
+        organizationService.save(organization1);
+        Organization organization2 = new Organization();
+        organization2.setCode("0003");
+        organization2.setName("京东物流");
+        organization2.setLeaf(false);
+        organization2.setPath("003");
+        organization2.setStatus("1");
+        organization2.setTenant(tenant);
+        organization2.setParent(root);
+        organizationService.save(organization2);
     }
 }

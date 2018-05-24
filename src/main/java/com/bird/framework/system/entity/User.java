@@ -41,11 +41,9 @@ public class User implements Serializable {
 
     private String status;
 
-    @ManyToMany(
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "users")
+    @ManyToMany
+    @JoinTable(name = "sys_role_user",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> roles = new HashSet<>(0);
 }

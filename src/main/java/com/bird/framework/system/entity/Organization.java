@@ -26,7 +26,8 @@ public class Organization implements Serializable {
     private Tenant tenant;
 
     @ManyToOne
-    private Organization organization;
+    @JoinColumn(name = "organization_id")
+    private Organization parent;
 
     @Version
     private Long version;

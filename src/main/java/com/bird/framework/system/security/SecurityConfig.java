@@ -1,6 +1,5 @@
 package com.bird.framework.system.security;
 
-import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -85,7 +84,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/login", "/state").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTLoginFilter(authenticationManager(), redissonClient))

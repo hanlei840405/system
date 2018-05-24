@@ -2,6 +2,8 @@ package com.bird.framework.system.service;
 
 import com.bird.framework.system.entity.User;
 import com.bird.framework.system.repository.UserRepo;
+import com.bird.framework.system.vo.UserVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +19,11 @@ public class UserService {
         return userRepo.getOne(id);
     }
 
-    public User getByUsername(String username) {
-        return userRepo.findByUsername(username);
+    public UserVo getByUsername(String username) {
+        User user = userRepo.findByUsername(username);
+        UserVo userVo = new UserVo();
+        BeanUtils.copyProperties(user, userVo);
+        return userVo;
     }
 
     public User getByNick(String nick) {
@@ -49,7 +54,7 @@ public class UserService {
         return userRepo.findByTenantIdAndOrganizationId(tenantId, organizationId);
     }
 
-    public void save(User user) {
-        userRepo.save(user);
+    public User save(User user) {
+        return userRepo.save(user);
     }
 }
