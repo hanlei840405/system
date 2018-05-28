@@ -3,7 +3,7 @@ spring:
     name: system
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/bird_system
+    url: jdbc:mysql://127.0.0.1:3306/bird_system?characterEncoding=utf8
     username: root
     password: 123456
   jpa:
@@ -11,7 +11,7 @@ spring:
       ddl-auto: create-drop
     show-sql: true
   redis:
-    port: 32769
+    port: 6379
     host: localhost
 logging:
   level:
