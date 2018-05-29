@@ -10,10 +10,12 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @EnableEurekaClient
 @SpringBootApplication
 @EnableJpaRepositories
+@EnableTransactionManagement
 public class SystemApplication {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
@@ -78,37 +80,25 @@ public class SystemApplication {
 
         OrganizationService organizationService = atx.getBean(OrganizationService.class);
         Organization root = new Organization();
-        root.setCode("0000");
         root.setName("root");
-        root.setLeaf(false);
-        root.setPath("0000");
-        root.setStatus("1");
+        root.setLeaf(true);
         root.setTenant(tenant);
         organizationService.save(root);
         Organization organization = new Organization();
-        organization.setCode("0001");
         organization.setName("京东商城");
-        organization.setLeaf(false);
-        organization.setPath("001");
-        organization.setStatus("1");
+        organization.setLeaf(true);
         organization.setTenant(tenant);
         organization.setParent(root);
         organizationService.save(organization);
         Organization organization1 = new Organization();
-        organization1.setCode("0002");
         organization1.setName("京东金融");
-        organization1.setLeaf(false);
-        organization1.setPath("002");
-        organization1.setStatus("1");
+        organization1.setLeaf(true);
         organization1.setTenant(tenant);
         organization1.setParent(root);
         organizationService.save(organization1);
         Organization organization2 = new Organization();
-        organization2.setCode("0003");
         organization2.setName("京东物流");
-        organization2.setLeaf(false);
-        organization2.setPath("003");
-        organization2.setStatus("1");
+        organization2.setLeaf(true);
         organization2.setTenant(tenant);
         organization2.setParent(root);
         organizationService.save(organization2);

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,8 @@ public class OrganizationService {
 
     @Autowired
     private OrganizationRepo organizationRepo;
+    @Autowired
+    private RedisSequenceService redisSequenceService;
 
     public OrganizationVo get(Long id) {
         Organization organization = organizationRepo.getOne(id);
@@ -74,13 +77,38 @@ public class OrganizationService {
         return page;
     }
 
+    @Transactional
     public Organization save(Organization organization) {
+        String parentPath;
+        if (organization.getParent() != null) {
+            Organization parent = organizationRepo.getOne(organization.getParent().getId());
+            organization.setParent(parent);
+            parentPath = parent.getPath();
+            // 更新父节点的leaf状态
+            parent.setLeaf(false);
+            organizationRepo.save(parent);
+        }else {
+            organization.setParent(null);
+            parentPath = "";
+        }
+
+        if (organization.getId() ==null) {// 新增，leaf节点设置为true, path根据上级的path追加
+            organization.setLeaf(true);
+            organization.setCode(redisSequenceService.generate("organization"));
+        }
+        organization.setStatus("1");
+        organization.setPath(parentPath + "/" + organization.getCode());
         return organizationRepo.save(organization);
     }
 
     private OrganizationVo convert2Vo(Organization organization) {
         OrganizationVo organizationVo = new OrganizationVo();
         BeanUtils.copyProperties(organization, organizationVo);
+        if (organization.getParent() != null) {
+            OrganizationVo parentVo = new OrganizationVo();
+            BeanUtils.copyProperties(organization.getParent(), parentVo);
+            organizationVo.setParent(parentVo);
+        }
         return organizationVo;
     }
 }
