@@ -4,6 +4,7 @@ import com.bird.framework.system.entity.Organization;
 import com.bird.framework.system.entity.QOrganization;
 import com.bird.framework.system.repository.OrganizationRepo;
 import com.bird.framework.system.vo.OrganizationVo;
+import com.bird.framework.system.vo.TenantVo;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,27 +88,47 @@ public class OrganizationService {
             // 更新父节点的leaf状态
             parent.setLeaf(false);
             organizationRepo.save(parent);
-        }else {
+        } else {
             organization.setParent(null);
             parentPath = "";
         }
 
-        if (organization.getId() ==null) {// 新增，leaf节点设置为true, path根据上级的path追加
+        if (organization.getId() == null) {
+            // 新增，leaf节点设置为true, path根据上级的path追加
             organization.setLeaf(true);
             organization.setCode(redisSequenceService.generate("organization"));
+            organization.setStatus("1");
+            organization.setPath(parentPath + "/" + organization.getCode());
+            return organizationRepo.save(organization);
+        }else {
+            Organization exist = organizationRepo.getOne(organization.getId());
+            exist.setName(organization.getName());
+            exist.setParent(organization.getParent());
+            String oldPath = exist.getPath();
+            // 更新子节点path属性
+            List<Organization> organizations = organizationRepo.findByPathStartingWith(exist.getPath() + "/");
+            organizations.parallelStream().forEach(item -> item.setPath(item.getPath().replace(oldPath, parentPath + "/" + exist.getCode())));
+            organizationRepo.saveAll(organizations);
+            exist.setPath(parentPath + "/" + exist.getCode());
+            return organizationRepo.save(exist);
         }
-        organization.setStatus("1");
-        organization.setPath(parentPath + "/" + organization.getCode());
-        return organizationRepo.save(organization);
     }
 
     private OrganizationVo convert2Vo(Organization organization) {
+        if (organization == null) {
+            return null;
+        }
         OrganizationVo organizationVo = new OrganizationVo();
         BeanUtils.copyProperties(organization, organizationVo);
         if (organization.getParent() != null) {
             OrganizationVo parentVo = new OrganizationVo();
             BeanUtils.copyProperties(organization.getParent(), parentVo);
             organizationVo.setParent(parentVo);
+        }
+        if (organization.getTenant() != null) {
+            TenantVo tenantVo = new TenantVo();
+            BeanUtils.copyProperties(organization.getTenant(), tenantVo);
+            organizationVo.setTenantVo(tenantVo);
         }
         return organizationVo;
     }

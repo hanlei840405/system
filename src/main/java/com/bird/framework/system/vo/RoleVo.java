@@ -1,11 +1,13 @@
 package com.bird.framework.system.vo;
 
 
-import com.bird.framework.system.entity.Tenant;
 import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author jesse.Han
+ */
 @Data
 public class RoleVo implements Serializable {
 
@@ -16,9 +18,9 @@ public class RoleVo implements Serializable {
 
     private String name;
 
+    private TenantVo tenantVo;
+
     private Long version;
 
     private String status;
-
-    private TenantVo tenantVo;
 }

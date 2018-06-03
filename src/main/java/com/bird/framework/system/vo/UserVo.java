@@ -1,11 +1,12 @@
 package com.bird.framework.system.vo;
 
-import com.bird.framework.system.entity.Organization;
-import com.bird.framework.system.entity.Tenant;
 import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author jesse.Han
+ */
 @Data
 public class UserVo implements Serializable {
 

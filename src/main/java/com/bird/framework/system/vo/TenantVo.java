@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author jesse.Han
+ */
 @Data
 public class TenantVo implements Serializable {
 

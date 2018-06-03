@@ -1,14 +1,13 @@
 package com.bird.framework.system.vo;
 
 
-import com.bird.framework.system.entity.Role;
-import com.bird.framework.system.entity.Tenant;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
+/**
+ * @author jesse.Han
+ */
 @Data
 public class ResourceVo implements Serializable {
 

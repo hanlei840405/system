@@ -1,10 +1,12 @@
 package com.bird.framework.system.vo;
 
-import com.bird.framework.system.entity.Tenant;
 import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author jesse.Han
+ */
 @Data
 public class OrganizationVo implements Serializable {
 
@@ -19,9 +21,9 @@ public class OrganizationVo implements Serializable {
 
     private boolean leaf;
 
-    private TenantVo tenantVo;
-
     private OrganizationVo parent;
+
+    private TenantVo tenantVo;
 
     private Long version;
 
