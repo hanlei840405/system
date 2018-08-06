@@ -1,68 +1,77 @@
 package com.bird.framework.system.security;
 
+import com.bird.framework.system.entity.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.util.StringUtils;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
-public class JWTAuthenticationFilter extends BasicAuthenticationFilter {
+public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+    private AuthenticationManager authenticationManager;
     private RedissonClient redissonClient;
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager, RedissonClient redissonClient) {
-        super(authenticationManager);
+        this.authenticationManager = authenticationManager;
         this.redissonClient = redissonClient;
     }
 
+    // 接收并解析用户凭证
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String header = request.getHeader("token");
-        if (!StringUtils.isEmpty(header)) {
-            UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            chain.doFilter(request, response);
-        }else {
-            chain.doFilter(request, response);
+    public Authentication attemptAuthentication(HttpServletRequest req,
+                                                HttpServletResponse res) throws AuthenticationException {
+        try {
+            User user = objectMapper.readValue(req.getInputStream(), User.class);
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getUsername(),
+                            user.getPassword(),
+                            new ArrayList<>())
+            );
+            RBucket<List<String>> rBucket = redissonClient.getBucket("authorities");
+            List<String> authorities = new ArrayList<>();
+            for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
+                authorities.add(grantedAuthority.getAuthority());
+
+            }
+            rBucket.set(authorities);
+            return authentication;
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
-    private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader("token");
-        if (token != null) {
-            // parse the token.
-            String user = Jwts.parser()
-                    .setSigningKey("bird")
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
+    // 用户成功登录后，这个方法会被调用，我们在这个方法里生成token
+    @Override
+    protected void successfulAuthentication(HttpServletRequest req,
+                                            HttpServletResponse res,
+                                            FilterChain chain,
+                                            Authentication auth) {
 
-            if (user != null) {
-                RBucket<List<String>> rBucket = redissonClient.getBucket("authorities");
-                List<GrantedAuthority> authorities = new ArrayList<>();
-                if (rBucket.get() != null) {
-                    for (String authority : rBucket.get()) {
-                        authorities.add(new SimpleGrantedAuthority(authority));
-                    }
-                }
-                return new UsernamePasswordAuthenticationToken(user, null, authorities);
-            }
-            return null;
-        }
-        return null;
+        String token = Jwts.builder()
+                .setSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 24 * 1000))
+                .signWith(SignatureAlgorithm.HS512, "bird")
+                .compact();
+        res.addHeader("token", token);
     }
 }

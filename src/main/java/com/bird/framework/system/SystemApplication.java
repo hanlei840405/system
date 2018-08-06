@@ -76,7 +76,7 @@ public class SystemApplication {
         roleService.save(role);
         user.getRoles().add(role);
         UserService userService = atx.getBean(UserService.class);
-        userService.save(user);
+        userService.save(tenant.getId(), user);
 
         OrganizationService organizationService = atx.getBean(OrganizationService.class);
         Organization root = new Organization();
